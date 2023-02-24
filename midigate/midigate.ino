@@ -8,13 +8,12 @@
  */ 
 
 #include "MIDIUSB.h"
-int C_GATE = 7;
-int D_GATE = 8;
-int E_GATE = 9;
+int notePins[] = {2,3,4,5,6,7,8,9,10,14,15,16};
+
 // list of all root notes in order of midi note number (0-11)
 char *notes[] = {"c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"};
-unsigned long timestamp;
-unsigned long oldtimestamp;
+// unsigned long timestamp;
+// unsigned long oldtimestamp;
 
 
 // First parameter is the event type (0x09 = note on, 0x08 = note off).
@@ -35,9 +34,9 @@ void noteOff(byte channel, byte pitch, byte velocity) {
 
 void setup() {
   Serial.begin(115200);
-  pinMode(C_GATE, OUTPUT);
-  pinMode(D_GATE, OUTPUT);
-  pinMode(E_GATE, OUTPUT);
+for (int i = 0; i < 12; i++) {
+  pinMode(notePins[i], OUTPUT);
+}
 }
 
 // First parameter is the event type (0x0B = control change).
@@ -56,8 +55,8 @@ void loop() {
     rx = MidiUSB.read();
     // Serial.println(rx.header);
     if (rx.header == 9) {
-      digitalWrite(E_GATE, HIGH);
-      oldtimestamp = millis();
+      // digitalWrite(E_GATE, HIGH);
+      // oldtimestamp = millis();
       // timestamp = millis();
       // if (timestamp - oldtimestamp > 500) {
       //   digitalWrite(E_GATE, LOW);
@@ -72,19 +71,19 @@ void loop() {
       Serial.println(rx.header);
 
       if (notes[(rx.byte2 % 12)] == "c" && rx.byte1 == 144) { // byte1 = 128 means noteOn 144 // note off?
-        digitalWrite(C_GATE, HIGH);
+        digitalWrite(notePins[0], HIGH);
       } else {
-        digitalWrite(C_GATE, LOW);
+        digitalWrite(notePins[0], LOW);
       }
       if (notes[(rx.byte2 % 12)] == "d" && rx.byte1 == 144) {
-        digitalWrite(D_GATE, HIGH);
+        digitalWrite(notePins[1], HIGH);
       } else {
-        digitalWrite(D_GATE, LOW);
+        digitalWrite(notePins[1], LOW);
       }
       if (notes[(rx.byte2 % 12)] == "e" && rx.byte1 == 144) {
-        digitalWrite(E_GATE, HIGH);
+        digitalWrite(notePins[2], HIGH);
       } else {
-        digitalWrite(E_GATE, LOW);
+        digitalWrite(notePins[2], LOW);
       }
       Serial.print("byte1: ");
       Serial.println(rx.byte1);
@@ -102,4 +101,9 @@ void loop() {
 
     
   } while (rx.header != 0);
+}
+
+void triggerOutput(noteNum) {
+  digitalWrite(notePins[noteNum], HIGH );
+  //... figure out a way to make a function turn on and off each gate output independently based on that midi note's length. (not working currently)
 }
